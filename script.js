@@ -76,6 +76,9 @@ function createFloor(floorNumber) {
     if (floorNumber === 0) { //Checks for ground floor
         const callButton = createButton("call", "G");
         buttonContainer.appendChild(callButton);
+    } else if (floorNumber === numberOfFloors - 1) { // Top floor should only have a "down" button
+        const downButton = createButton("down", "▼");
+        buttonContainer.appendChild(downButton);
     } else { //for any other floor
         const upButton = createButton("up", "▲"); // calls createButton() function with classname and button text as inputs
         const downButton = createButton("down", "▼");
