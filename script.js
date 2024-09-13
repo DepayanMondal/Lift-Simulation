@@ -29,7 +29,7 @@ function initializeSimulation() {
     initializeLiftData();
     initializeFloorOccupancy();
     handleButtonClicks();
-    document.querySelector("form").style.display = "none"; // hides input form
+    // document.querySelector("form").style.display = "none"; // hides input form
 }
 
 function generateFloorsAndLifts() {
