@@ -1,0 +1,123 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    box-sizing: border-box;
+    background-color: #212121;
+    color: #fff;
+}
+
+#user_input{
+    border: 2px solid white;
+    border-radius: 4px;
+    width: 60%;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    place-items: center;
+}
+
+input{
+    margin: 1rem;
+}
+
+button{
+    margin: 1rem;
+}
+
+.ground_floor{
+    border: 2px solid black;
+    border-radius: 4px;
+    margin: 4px;
+    padding: 8px;
+    display: flex;
+    height: 100px;
+}
+
+.floor{
+    border: 2px solid white;
+    border-radius: 4px;
+    margin: 4px;
+    padding: 8px;
+    display: flex;
+    height: 100px;
+}
+
+.lift_controls{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    place-items: center;
+    flex-basis: 10%;
+    text-align: left;
+    margin-right: 1.5rem;
+    white-space: nowrap;
+}
+
+.call_lift {
+    display: flex;
+    flex-direction: column;
+}
+
+.floor_number{
+    margin-right: .20rem;
+    white-space: nowrap;
+}
+
+.up, .down, .call{
+ margin:  .20rem;
+ font-weight: 800;
+}
+
+.lift{
+    width: 4rem;
+    border: 1px solid white;
+    margin-right: auto;
+    overflow: hidden;
+    box-shadow: inset 0 15px 20px rgba(255, 255, 255, 0.8);
+}
+
+.door {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    overflow: hidden;
+}
+
+.door_left {
+    width: 50%;
+    height: 100%;
+    border-right: 1px solid white;
+    background-color: gray;
+    animation: slideLeft 2.5s linear;
+}
+
+.door_right {
+    width: 50%;
+    height: 100%;
+    border-left: 1px solid white;
+    background-color: gray;
+    animation: slideRight 2.5s linear;
+}
+
+.door_left, .door_right {
+    transition: transform 2.5s;
+}
+
+
+/* +++++++++++++++ Door Animations ++++++++++++++++++++++*/
+
+@keyframes slideLeft {
+    0% {transform: translateX(0);}
+    50% {transform: translateX(-100%);}
+    100% {transform: translateX(0);}
+}
+
+@keyframes slideRight {
+    0% {transform: translateX(0);}
+    50% {transform: translateX(100%);}
+    100% {transform: translateX(0);}
+}
+
+
