@@ -30,6 +30,7 @@ function initializeSimulation() {
     initializeFloorOccupancy();
     handleButtonClicks();
     document.querySelector("form").style.display = "none"; // hides input form
+    document.querySelector("#simulation_page").style.display = "flex";
 }
 
 function generateFloorsAndLifts() {
