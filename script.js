@@ -136,46 +136,30 @@ function initializeFloorOccupancy() {
 function updateFloorOccupancy(floorNumber, isOccupied) { // (index of floor, boolean value)
     floorOccupancy[floorNumber] = isOccupied; // isOccupied = True
 }
-
 // Sets up event listeners on all lift control buttons to manage button press, process lift requests
-
 function handleButtonClicks() {
-    document.querySelectorAll(".up, .down, .call").forEach(function(button) {
-        button.addEventListener("click", function() {
-            const floorID = parseInt(this.closest(".floor").id);
-            const buttonType = this.className;
+    document.querySelectorAll(".up, .down, .call").forEach(function(button) { // selects all elements with "up" "down" "call" classname and iterates for each selected element
+        button.addEventListener("click", function() { //adds "click" event listner to each button
+            const floorID = parseInt(this.closest(".floor").id); // gets the ID of the floor containing the clicked button
+            const buttonType = this.className; // gets the class name of the clicked button to indicates it's type: up, down, call
 
-            // Check if it's a ground floor request and all lifts are at ground floor
-            if (floorID === 0 && allLiftsAtGroundFloor()) {
-                if (buttonPressQueue.length === 0) {
-                    buttonPressQueue.push({ floorID, buttonType, timestamp: Date.now() });
-                    processLiftRequests();
-                }
-                return; // Exit the function early
-            }
-
-            // For other floors, proceed as before
+            // Check if the floor is not occupied
             if (!floorOccupancy[floorID]) {
-                buttonPressQueue.push({ floorID, buttonType, timestamp: Date.now() });
-                processLiftRequests();
+                buttonPressQueue.push({ floorID, buttonType, timestamp: Date.now() }); // adds button press object to array
+                processLiftRequests(); // calls lift request to be processed
             } else {
                 console.log(`Floor ${floorID} is already occupied. Request ignored.`);
+
+                // Find the lift on the occupied floor and trigger the door animation
                 const liftAtOccupiedFloor = findLiftAtFloor(floorID);
-                if (liftAtOccupiedFloor) {
-                    const liftElement = document.getElementById(`lift-${liftAtOccupiedFloor.liftIndex}`);
-                    animateDoors(liftElement, function() {
+                if (liftAtOccupiedFloor) { // if lift is found
+                    const liftElement = document.getElementById(`lift-${liftAtOccupiedFloor.liftIndex}`); //get lift id
+                    animateDoors(liftElement, function() { // Calls the animateDoors() function to play the lift door animation
                         console.log(`Lift doors animated at occupied floor ${floorID}.`);
                     });
                 }
             }
         });
-    });
-}
-
-// New function to check if all lifts are at the ground floor
-function allLiftsAtGroundFloor() {
-    return liftData.every(function(lift) {
-        return lift.currentFloor === 0 && !lift.isMoving;
     });
 }
 
@@ -190,19 +174,6 @@ function processLiftRequests() {
     if (buttonPressQueue.length === 0) return; // Exits the function if there are no requests in the queue.
 
     const request = buttonPressQueue[0]; // Retrieves the first request in the queue without removing it
-
-
-    // New exception for ground floor
-    if (request.floorID === 0 && allLiftsAtGroundFloor()) {
-        buttonPressQueue.shift(); // Remove the request
-        const firstLift = document.getElementById('lift-0');
-        animateDoors(firstLift, () => {
-            setTimeout(processLiftRequests, 0);
-        });
-        return;
-    }
-
-
     // Check if the requested floor is already occupied
     if (floorOccupancy[request.floorID]) {
         buttonPressQueue.shift(); // Remove the request for the occupied floor
