@@ -3,7 +3,6 @@ let numberOfFloors;
 let numberOfLifts;
 let liftData = [];
 let buttonPressQueue = [];
-let floorOccupancy = [];
 
 // Event listener for user inputs
 document.querySelector("form").addEventListener("submit", function(e) {
@@ -27,7 +26,6 @@ function isValidInput(floors, lifts) {
 function initializeSimulation() {
     generateFloorsAndLifts();
     initializeLiftData();
-    initializeFloorOccupancy();
     handleButtonClicks();
     document.querySelector("form").style.display = "none"; // hides input form
     document.querySelector("#simulation_page").style.display = "flex";
@@ -122,20 +120,12 @@ function initializeLiftData() {
             liftIndex: index,
             currentFloor: 0,
             targetFloor: 0,
-            isMoving: false
+            isMoving: false,
+            direction: null,
         };
     });
 }
 
-// function to initialize floor occupancy status
-function initializeFloorOccupancy() {
-    floorOccupancy = Array(numberOfFloors).fill(false);
-}
-
-// Updates the occupancy status of a specific floor in the floorOccupancy[] array
-function updateFloorOccupancy(floorNumber, isOccupied) { // (index of floor, boolean value)
-    floorOccupancy[floorNumber] = isOccupied; // isOccupied = True
-}
 // Sets up event listeners on all lift control buttons to manage button press, process lift requests
 function handleButtonClicks() {
     document.querySelectorAll(".up, .down, .call").forEach(function(button) { // selects all elements with "up" "down" "call" classname and iterates for each selected element
@@ -143,48 +133,28 @@ function handleButtonClicks() {
             const floorID = parseInt(this.closest(".floor").id); // gets the ID of the floor containing the clicked button
             const buttonType = this.className; // gets the class name of the clicked button to indicates it's type: up, down, call
 
+            const existingLift = liftData.find((lift)=> lift.targetFloor === floorID && lift.direction === buttonType);
             // Check if the floor is not occupied
-            if (!floorOccupancy[floorID]) {
+            if (!existingLift) {
                 buttonPressQueue.push({ floorID, buttonType, timestamp: Date.now() }); // adds button press object to array
                 processLiftRequests(); // calls lift request to be processed
             } else {
                 console.log(`Floor ${floorID} is already occupied. Request ignored.`);
-
-                // Find the lift on the occupied floor and trigger the door animation
-                const liftAtOccupiedFloor = findLiftAtFloor(floorID);
-                if (liftAtOccupiedFloor) { // if lift is found
-                    const liftElement = document.getElementById(`lift-${liftAtOccupiedFloor.liftIndex}`); //get lift id
-                    animateDoors(liftElement, function() { // Calls the animateDoors() function to play the lift door animation
-                        console.log(`Lift doors animated at occupied floor ${floorID}.`);
-                    });
-                }
             }
         });
     });
 }
 
-// function to find lift at the specific floor used to trigger lift door animation at occupied floors
-function findLiftAtFloor(floorID) {
-    return liftData.find(function(lift) { //Searches through liftData to find the first lift meeting the criteria.
-        return lift.currentFloor === floorID && !lift.isMoving; // Checks if the lift is currently at the specified floorID and is not moving and returns the matching lift object
-    });
-}
 // Processes button press requests from the queue and manages lift assignment based on current status of the lifts and floors.
 function processLiftRequests() {
     if (buttonPressQueue.length === 0) return; // Exits the function if there are no requests in the queue.
 
     const request = buttonPressQueue[0]; // Retrieves the first request in the queue without removing it
-    // Check if the requested floor is already occupied
-    if (floorOccupancy[request.floorID]) {
-        buttonPressQueue.shift(); // Remove the request for the occupied floor
-        processLiftRequests(); // Continue processing the next request
-        return;
-    }
 
     const availableLift = findNearestAvailableLift(request.floorID); // calls findNearestAvaulableLift() function to find the nearest lift that can answer the current button press request.
     if (availableLift !== null) { // if available lift is found
         buttonPressQueue.shift(); // Remove the request only if it can be processed
-        moveLift(availableLift, request.floorID); // calls the moveLift function with (liftIndex of the available lift, floorID of the button press request)
+        moveLift(availableLift, request.floorID, request.buttonType); // calls the moveLift function with (liftIndex of the available lift, floorID of the button press request)
     } else {
         setTimeout(processLiftRequests); // Check again after 1 second
     }
@@ -194,10 +164,6 @@ function findNearestAvailableLift(targetFloor) {
     let nearestLift = null; //null is used to represent the absence of a lift initially.
     let minDistance = Infinity; //Infinity is used as an initial value because it is guaranteed to be larger than any real distance calculated during the iteration
 
-    // If the target floor is occupied, return null this is useful when button is pressed at a floor which already has a lift
-    if (floorOccupancy[targetFloor]) {
-        return null;
-    }
     // calculates and compares closest available lift
     liftData.forEach(function(lift) {
         if (!lift.isMoving) { // if not moving
@@ -211,12 +177,10 @@ function findNearestAvailableLift(targetFloor) {
     return nearestLift; // returns lift object of the nearest available lift/ returns null if no lift is found
 }
 // moves a specified lift to a target floor, manages lift movement animation and updates floor occupancy status
-function moveLift(lift, targetFloor) {
+function moveLift(lift, targetFloor, direction) {
     lift.isMoving = true; // Set the lift's status to moving.
     lift.targetFloor = targetFloor; // Update the lift's target floor.
-
-    updateFloorOccupancy(targetFloor, true); // Mark the target floor as occupied
-    updateFloorOccupancy(lift.currentFloor, false); // Mark the current floor as unoccupied
+    lift.direction = direction;
 
     const liftElement = document.getElementById(`lift-${lift.liftIndex}`); // select lift's html element
     const floorHeight = document.querySelector('.floor').offsetHeight; // determine height of ".floor" (offsetHeight don't account for margin)
@@ -232,6 +196,7 @@ function moveLift(lift, targetFloor) {
         lift.currentFloor = targetFloor; // updates the lift's current floor to the target floor.
         animateDoors(liftElement, () => { // animateDoors() function is called to visually animate the lift doors
             lift.isMoving = false; // isMoving property of lift object is set to false
+            lift.direction = null;
             setTimeout(() => {
                 processLiftRequests();
             });
