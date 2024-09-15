@@ -120,7 +120,6 @@ button{
     height: 100%;
     border-right: 1px solid white;
     background-color: gray;
-    animation: slideLeft 2.5s linear;
 }
 
 .door_right {
@@ -128,22 +127,9 @@ button{
     height: 100%;
     border-left: 1px solid white;
     background-color: gray;
-    animation: slideRight 2.5s linear;
 }
 
 .door_left, .door_right {
     transition: transform 2.5s;
 }
 
-/* +++++++++++++++ Door Animations ++++++++++++++++++++++*/
-@keyframes slideLeft {
-    0% {transform: translateX(0);}
-    50% {transform: translateX(-100%);}
-    100% {transform: translateX(0);}
-}
-
-@keyframes slideRight {
-    0% {transform: translateX(0);}
-    50% {transform: translateX(100%);}
-    100% {transform: translateX(0);}
-}
