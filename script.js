@@ -138,6 +138,7 @@ function updateFloorOccupancy(floorNumber, isOccupied) { // (index of floor, boo
 }
 
 // Sets up event listeners on all lift control buttons to manage button press, process lift requests
+
 function handleButtonClicks() {
     document.querySelectorAll(".up, .down, .call").forEach(function(button) {
         button.addEventListener("click", function() {
@@ -152,6 +153,7 @@ function handleButtonClicks() {
                 }
                 return; // Exit the function early
             }
+
             // For other floors, proceed as before
             if (!floorOccupancy[floorID]) {
                 buttonPressQueue.push({ floorID, buttonType, timestamp: Date.now() });
@@ -169,12 +171,14 @@ function handleButtonClicks() {
         });
     });
 }
+
 // New function to check if all lifts are at the ground floor
 function allLiftsAtGroundFloor() {
     return liftData.every(function(lift) {
         return lift.currentFloor === 0 && !lift.isMoving;
     });
 }
+
 // function to find lift at the specific floor used to trigger lift door animation at occupied floors
 function findLiftAtFloor(floorID) {
     return liftData.find(function(lift) { //Searches through liftData to find the first lift meeting the criteria.
@@ -197,6 +201,8 @@ function processLiftRequests() {
         });
         return;
     }
+
+
     // Check if the requested floor is already occupied
     if (floorOccupancy[request.floorID]) {
         buttonPressQueue.shift(); // Remove the request for the occupied floor
